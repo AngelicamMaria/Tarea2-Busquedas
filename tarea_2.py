@@ -19,7 +19,7 @@ Para que funcione, este modulo debe de encontrarse en la misma carpeta que bloca
 
 """
 
-__author__ = 'Escribe aquí tu nombre'
+__author__ = 'Angelica'
 
 import blocales
 import random
@@ -67,7 +67,7 @@ class problema_grafica_grafo(blocales.Problema):
 
         """
         return tuple(random.randint(10, self.dim - 10) for _ in range(2 * len(self.vertices)))
-
+    # Ya esta
     def vecino_aleatorio(self, estado, dispersion=None):
         """
         Encuentra un vecino en forma aleatoria. En estea primera versión lo que hacemos es tomar un valor aleatorio,
@@ -80,13 +80,11 @@ class problema_grafica_grafo(blocales.Problema):
         @param dispersion: Un flotante con el valor de dispersión para el vertice seleccionado
 
         @return: Una tupla con un estado vecino al estado de entrada.
-
-        """
         vecino = list(estado)
         i = random.randint(0, len(vecino) - 1)
         vecino[i] = max(
             10, min(self.dim - 10, vecino[i] + random.choice([-1, 1])))
-        return vecino
+        """
         #######################################################################
         #                          20 PUNTOS
         #######################################################################
@@ -101,9 +99,15 @@ class problema_grafica_grafo(blocales.Problema):
         #   4. Sumale dichos valores (redondeados) a los valores originales de
         #      la posicion en x y y de la posicion de la arista. tomando en cuenta
         #      los límites que tiene la imagen (en numero máximo de pixeles).
-        #
-        #
-        # -- Comenta la función ya programada, programa inmediatamenta despues de este comentario 
+        vecino = list(estado)
+        K1 = random.uniform(-1, 1) * dispersion
+        K2 = random.uniform(-1, 1) * dispersion
+        Estados = self.estado2dic(estado)
+        vecino[vecino.index(Estados[0])] = max(10, min(self.dim - 10, vecino[vecino.index(Estados[0])] + K1))
+        vecino[vecino.index(Estados[1])] = max(10, min(self.dim - 10, vecino[vecino.index(Estados[1])] + K2))
+        return vecino
+
+        # -- Comenta la función ya programada, programa inmediatamenta despues de este comentario
         #    tu solución. ¿Como integras esta dispersión para utilizar la temperatura del temple simulado?
         #    ¿Que resultados obtienes con el nuevo método? Comenta tus resultados.
 
@@ -122,9 +126,9 @@ class problema_grafica_grafo(blocales.Problema):
         # Inicializa fáctores lineales para los criterios más importantes
         # (default solo cuanta el criterio 1)
         K1 = 1.0
-        K2 = 0.0
-        K3 = 0.0
-        K4 = 0.0
+        K2 = 1.0
+        K3 = 1.0
+        K4 = 1.0
 
         # Genera un diccionario con el estado y la posición para facilidad
         estado_dic = self.estado2dic(estado)
@@ -226,6 +230,7 @@ class problema_grafica_grafo(blocales.Problema):
         @return: Un número.
 
         """
+
         #######################################################################
         #                          20 PUNTOS
         #######################################################################
@@ -237,7 +242,22 @@ class problema_grafica_grafo(blocales.Problema):
         #
         # ------ IMPLEMENTA AQUI TU CÓDIGO ------------------------------------
         #
-        return 0
+        Angulo = math.PI/6
+        Vertices = self.separacion_vertices(estado_dic)
+        TotalDelAngulo = 0.0
+        costo = 0
+        for (Ver1, Ver2) in itertools.combinations(self.aristas, 2):
+            pasado = Ver1[0]
+            for i in Ver1:
+                Angulo1 = (estado_dic[Ver1[Ver1.index(i)]][0] - estado_dic[pasado][0], estado_dic[Ver1[Ver1.index(i)][1]] - estado_dic[pasado][1])
+            for j in Ver1:
+                Angulo2 = (estado_dic[Ver2[Ver2.index(j)]][0] - estado_dic[pasado][0], estado_dic[Ver2[Ver1.index(Ver1[j])]][1] - estado_dic[pasado][1])
+
+            A = math.acos(abs(Angulo1[0]*Angulo2[0] + Angulo1[1]*Angulo2[1])/(math.sqrt(math.pow(Angulo1[0],2) + math.pow(Angulo1[1],2)) * math.sqrt(math.pow(Angulo2[0],2) + math.pow(Angulo2[1],2))+0.0000001))
+            if A < Angulo:
+                TotalDelAngulo += A/Angulo
+        return TotalDelAngulo
+
 
     def criterio_propio(self, estado_dic):
         """
@@ -250,6 +270,7 @@ class problema_grafica_grafo(blocales.Problema):
         @return: Un número.
 
         """
+
         #######################################################################
         #                          20 PUNTOS
         #######################################################################
@@ -261,6 +282,11 @@ class problema_grafica_grafo(blocales.Problema):
         #
         # ------ IMPLEMENTA AQUI TU CÓDIGO ------------------------------------
         #
+        estadoDic = self.estado2dic(self.estado_dic)
+
+        return (self.separacion_vertices(estado_dic) +
+                self.angulo_aristas(estado_dic))
+
         return 0
 
     def estado2dic(self, estado):
